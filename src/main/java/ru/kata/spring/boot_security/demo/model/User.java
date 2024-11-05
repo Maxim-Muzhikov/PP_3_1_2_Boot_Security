@@ -1,11 +1,17 @@
 package ru.kata.spring.boot_security.demo.model;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import javax.persistence.*;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +29,7 @@ public class User {
 	@Column(name = "password", nullable = false)
 	private String password;
 	
-	@ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	@JoinTable(
 			name = "user_roles",
 			joinColumns = @JoinColumn(name = "user_id"),
@@ -35,10 +41,19 @@ public class User {
 	
 	}
 	
-	public User(String firstName, String lastName, String email) {
+	public User(String firstName, String lastName, String email, String password) {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
+		this.password = password;
+	}
+	
+	public User(String firstName, String lastName, String email, String password, Set<Role> roles) {
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.email = email;
+		this.password = password;
+		this.roles = roles;
 	}
 	
 	public Long getId() {
@@ -73,8 +88,38 @@ public class User {
 		this.email = email;
 	}
 	
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return roles;
+	}
+	
 	public String getPassword() {
 		return password;
+	}
+	
+	@Override
+	public String getUsername() {
+		return email;
+	}
+	
+	@Override
+	public boolean isAccountNonExpired() {
+		return true;
+	}
+	
+	@Override
+	public boolean isAccountNonLocked() {
+		return true;
+	}
+	
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
+	
+	@Override
+	public boolean isEnabled() {
+		return true;
 	}
 	
 	public void setPassword(String password) {
@@ -87,5 +132,17 @@ public class User {
 	
 	public void setRoles(Set<Role> roles) {
 		this.roles = roles;
+	}
+	
+	public void addRole(String name) {
+	
+	}
+	
+	public String getStringOfRoles() {
+		if (roles == null || roles.isEmpty()) {
+			return ""; // Или другое значение по умолчанию
+		}
+		
+		return roles.stream().map(Role::getName).collect(Collectors.joining(", "));
 	}
 }

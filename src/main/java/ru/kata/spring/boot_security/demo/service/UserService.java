@@ -9,7 +9,7 @@ public interface UserService {
 	public List<User> getAll();
 	public List<User> getByRole(Role role);
 	public User getById(Long id);
-	public void set(User user);
+	public void save(User user);
 	public void delete(User user);
 	public void deleteById(Long id);
 	public User findByEmail(String email);
