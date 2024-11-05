@@ -5,7 +5,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -140,7 +139,7 @@ public class User implements UserDetails {
 	
 	public String getStringOfRoles() {
 		if (roles == null || roles.isEmpty()) {
-			return ""; // Или другое значение по умолчанию
+			return "";
 		}
 		
 		return roles.stream().map(Role::getName).collect(Collectors.joining(", "));

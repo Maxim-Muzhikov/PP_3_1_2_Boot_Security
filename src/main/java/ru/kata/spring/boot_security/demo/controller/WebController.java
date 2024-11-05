@@ -63,7 +63,7 @@ public class WebController {
 	public String userEdit(@PathVariable Long id, Model model) {
 		User user = userService.getById(id);
 		if (user == null) {
-			return "redirect:/error"; // Или другая страница/обработчик
+			return "redirect:/error";
 		}
 		model.addAttribute("user", user);
 		List<Role> roles = roleService.getAll();
@@ -73,24 +73,17 @@ public class WebController {
 	
 	@PostMapping("/admin/user-save")
 	public String userSave(User user) {
-		if(user.getPassword() != null && user.getPassword().isEmpty()) {
+		if (user.getPassword() != null && user.getPassword().isEmpty()) {
 			User userFromDB = userService.getById(user.getId());
 			String oldPassword = userFromDB.getPassword();
 			user.setPassword(oldPassword);
-		} else if(user.getPassword() != null) {
+		} else if (user.getPassword() != null) {
 			String newPassword = passwordEncoder.encode(user.getPassword());
 			user.setPassword(newPassword);
 		}
 		userService.save(user);
 		return "redirect:/admin";
 	}
-	
-//	@GetMapping(value = "/cars")
-//	public String printCars(@RequestParam(value = "count", required = false, defaultValue = "5") int count, ModelMap model) {
-//		List<Car> cars = carService.getCars(count);
-//		model.addAttribute("cars", cars);
-//		return "cars";
-//	}
 	
 	@GetMapping("/admin/user-delete/{id}")
 	public String userDelete(@PathVariable Long id) {
@@ -117,7 +110,7 @@ public class WebController {
 					|| (isCurrentUser_User
 					&& Objects.equals(userService.findByEmail(currentUser.getUsername()).getId(), userId));
 			
-			if(!isAllowedToSee) {
+			if (!isAllowedToSee) {
 				return "redirect:/user";
 			}
 			

@@ -59,10 +59,12 @@
         button:hover {
             background-color: #45a049;
         }
+
         .roles-container {
             display: flex;
             flex-wrap: wrap;
         }
+
         .role-item {
             margin-right: 10px;
         }
@@ -108,7 +110,7 @@
         <label>Роли:</label>
         <div class="roles-container">
             <div class="role-item" th:each="role : ${allRoles}">
-                <input type="checkbox" th:field="*{roles}" th:value="${role.id}" th:id="'role_' + ${role.id}" />
+                <input type="checkbox" th:field="*{roles}" th:value="${role.id}" th:id="'role_' + ${role.id}"/>
                 <label th:for="'role_' + ${role.id}" th:text="${role.name}"></label>
             </div>
         </div>
