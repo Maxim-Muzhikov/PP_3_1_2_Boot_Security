@@ -97,37 +97,16 @@ public class WebController {
 	                       @AuthenticationPrincipal UserDetails currentUser,
 	                       Model model) {
 		
-		Collection<? extends GrantedAuthority> currentUserAuthorities = currentUser.getAuthorities();
-		
-		boolean isCurrentUser_Admin = currentUserAuthorities.contains(roleService.getByName("ADMIN"));
-		boolean isCurrentUser_User = currentUserAuthorities.contains(roleService.getByName("USER"));
-		
-		User user;
-		
-		if (userId != null) {
-			
-			boolean isAllowedToSee = (isCurrentUser_Admin)
-					|| (isCurrentUser_User
-					&& Objects.equals(userService.findByEmail(currentUser.getUsername()).getId(), userId));
-			
-			if (!isAllowedToSee) {
-				return "redirect:/user";
-			}
-			
-			user = userService.getById(userId);
-			
-		} else {
-			user = userService.findByEmail(currentUser.getUsername());
-		}
+		User user = userService.getUserForProfile(userId, currentUser);
 		
 		if (user == null) {
 			return "redirect:/user";
 		}
 		
-		Boolean isUser_CurrentUser = Objects.equals(user.getId(), userService.findByEmail(currentUser.getUsername()).getId());
+		boolean isCurrentUser = userService.isCurrentUser(user, currentUser);
 		
 		model.addAttribute("user", user);
-		model.addAttribute("isCurrentUser", isUser_CurrentUser);
+		model.addAttribute("isCurrentUser", isCurrentUser);
 		
 		return "user/profile";
 	}

@@ -1,5 +1,6 @@
 package ru.kata.spring.boot_security.demo.service;
 
+import org.springframework.security.core.userdetails.UserDetails;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 
@@ -19,4 +20,8 @@ public interface UserService {
 	public void deleteById(Long id);
 	
 	public User findByEmail(String email);
+	
+	public User getUserForProfile(Long userId, UserDetails currentUser);
+	
+	public boolean isCurrentUser(User user, UserDetails currentUser);
 }
