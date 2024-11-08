@@ -10,26 +10,24 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import ru.kata.spring.boot_security.demo.dto.UserDTO;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Controller
 public class WebController {
 	
 	private final UserService userService;
 	private final RoleService roleService;
-	private final PasswordEncoder passwordEncoder;
 	
-	public WebController(UserService userService, RoleService roleService, PasswordEncoder passwordEncoder) {
+	public WebController(UserService userService, RoleService roleService) {
 		this.userService = userService;
 		this.roleService = roleService;
-		this.passwordEncoder = passwordEncoder;
 	}
 	
 	
@@ -46,7 +44,7 @@ public class WebController {
 	
 	@GetMapping("/admin")
 	public String admin(Model model) {
-		List<User> users = userService.getAll();
+		List<UserDTO> users = userService.getAll().stream().map(UserDTO::new).collect(Collectors.toList());
 		model.addAttribute("users", users);
 		return "admin/users";
 	}
@@ -61,7 +59,7 @@ public class WebController {
 	
 	@GetMapping("/admin/user-edit/{id}")
 	public String userEdit(@PathVariable Long id, Model model) {
-		User user = userService.getById(id);
+		UserDTO user = new UserDTO(userService.getById(id));
 		if (user == null) {
 			return "redirect:/error";
 		}
@@ -73,14 +71,6 @@ public class WebController {
 	
 	@PostMapping("/admin/user-save")
 	public String userSave(User user) {
-		if (user.getPassword() != null && user.getPassword().isEmpty()) {
-			User userFromDB = userService.getById(user.getId());
-			String oldPassword = userFromDB.getPassword();
-			user.setPassword(oldPassword);
-		} else if (user.getPassword() != null) {
-			String newPassword = passwordEncoder.encode(user.getPassword());
-			user.setPassword(newPassword);
-		}
 		userService.save(user);
 		return "redirect:/admin";
 	}
@@ -97,15 +87,15 @@ public class WebController {
 	                       @AuthenticationPrincipal UserDetails currentUser,
 	                       Model model) {
 		
-		User user = userService.getUserForProfile(userId, currentUser);
+		UserDTO userDTO = new UserDTO(userService.getUserForProfile(userId, currentUser));
 		
-		if (user == null) {
+		if (userDTO == null) {
 			return "redirect:/user";
 		}
 		
-		boolean isCurrentUser = userService.isCurrentUser(user, currentUser);
+		boolean isCurrentUser = userService.isCurrentUser(userService.getById(userDTO.getId()), currentUser);
 		
-		model.addAttribute("user", user);
+		model.addAttribute("user", userDTO);
 		model.addAttribute("isCurrentUser", isCurrentUser);
 		
 		return "user/profile";
@@ -113,11 +103,11 @@ public class WebController {
 	
 	@GetMapping("/user/{id}")
 	public String userHome(@PathVariable Long id, Model model) {
-		User user = userService.getById(id);
-		if (user == null) {
+		UserDTO userDTO = new UserDTO(userService.getById(id));
+		if (userDTO == null) {
 			return "redirect:/error?string=userNotFound";
 		}
-		model.addAttribute("user", user);
+		model.addAttribute("user", userDTO);
 		return "user/profile";
 	}
 	

@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 	
+	@Query("SELECT u FROM User u JOIN FETCH u.roles WHERE u.email = :email")
 	User findByEmail(String email);
 	
 	@Query("SELECT u FROM User u JOIN FETCH u.roles WHERE :role MEMBER OF u.roles")
